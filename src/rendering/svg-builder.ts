@@ -1,4 +1,6 @@
 import { SeededRandom } from '../utils/random';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class SVGBuilder {
   private elements: string[] = [];
@@ -81,6 +83,39 @@ export class SVGBuilder {
       </radialGradient>
     `);
     return gradientId;
+  }
+
+  /**
+   * Load and embed an external SVG asset
+   */
+  embedSVGAsset(assetPath: string, x: number, y: number, size: number, scale: number = 1): void {
+    try {
+      const fullPath = path.resolve(process.cwd(), assetPath);
+      const svgContent = fs.readFileSync(fullPath, 'utf-8');
+      
+      // Extract the content between <svg> tags, excluding the opening and closing svg tags
+      const svgMatch = svgContent.match(/<svg[^>]*>(.*?)<\/svg>/s);
+      if (!svgMatch) {
+        console.warn(`Could not parse SVG content from ${assetPath}`);
+        return;
+      }
+      
+      const innerSVG = svgMatch[1];
+      
+      // Calculate proper transform for positioning and scaling
+      // Most SVG assets are around 512-1024px, we want them to be around 50-100px
+      const baseScale = (size * scale) / 1024; // Assuming source SVG is ~1024px
+      const offsetX = x - (512 * baseScale); // Center horizontally
+      const offsetY = y - (512 * baseScale); // Center vertically
+      
+      const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
+      
+      // Wrap the SVG content in a group with the transform
+      this.addElement(`<g transform="${transform}">${innerSVG}</g>`);
+      
+    } catch (error) {
+      console.warn(`Could not load SVG asset from ${assetPath}:`, error);
+    }
   }
 
   // Helper methods for common cat shapes
@@ -180,14 +215,14 @@ export class SVGBuilder {
   }
 
   drawCatMouth(x: number, y: number, mouthType: string, size: number): void {
-    const mouthY = y + size * 0.25;
+    const mouthY = y + size * 0.5; // Move mouth much lower for better spacing from eyes
     const mouthSize = size * 0.25;
 
-    // Add cute nose first - moved down to avoid whiskers overlap
-    this.ellipse(x, y + size * 0.1, size * 0.06, size * 0.05, '#FFB6C1');
+    // Add cute nose first - moved much lower for better spacing from eyes
+    this.ellipse(x, y + size * 0.35, size * 0.06, size * 0.05, '#FFB6C1');
     
-    // Add nose line - also moved down
-    this.path(`M ${x} ${y + size * 0.15} L ${x} ${y + size * 0.23}`, 'none', this.darkenColor('#FFB6C1', 40), 2);
+    // Add nose line - also moved lower
+    this.path(`M ${x} ${y + size * 0.4} L ${x} ${y + size * 0.48}`, 'none', this.darkenColor('#FFB6C1', 40), 2);
 
     switch (mouthType) {
       case 'smile':
@@ -292,7 +327,7 @@ export class SVGBuilder {
   // Draw whiskers with more realistic curves
   drawWhiskers(x: number, y: number, size: number): void {
     const whiskerLength = size * 0.5; // Longer whiskers
-    const whiskerY = y + size * 0.25; // Move whiskers down, away from eyes
+    const whiskerY = y + size * 0.5; // Move whiskers much lower to align with mouth area
     
     // Left whiskers - starting more to the side and extending further outward
     this.path(`M ${x - size * 0.5} ${whiskerY - size * 0.05} 
@@ -325,10 +360,10 @@ export class SVGBuilder {
 
   // Draw cute cheek blush
   drawCheekBlush(x: number, y: number, size: number): void {
-    // Make blush more prominent and positioned lower like the reference
+    // Make blush more prominent and positioned lower for better spacing
     const cheekSize = size * 0.16;
     const cheekOffset = size * 0.45;
-    const cheekY = y + size * 0.2; // Lower position for more kawaii look
+    const cheekY = y + size * 0.5; // Move to same level as whiskers
     
     // Use a slightly more vibrant pink for better visibility
     const blushColor = '#FFB6C1';
@@ -436,37 +471,58 @@ export class SVGBuilder {
   }
 
   private drawBowTie(x: number, y: number, size: number): void {
-    const bowY = y + size * 1.2; // Position on the neck, just below the head
-    const bowSize = size * 0.15;
+    // Use external SVG asset for bow-tie
+    const bowY = y + size * 0.8; // Position on the neck/chest area
+    const bowScale = 2.0; // Larger scale for better visibility
     
-    // Bow tie wings
-    this.path(`M ${x - bowSize} ${bowY - bowSize * 0.5} 
-               Q ${x - bowSize * 1.5} ${bowY} 
-               ${x - bowSize} ${bowY + bowSize * 0.5}
-               L ${x - bowSize * 0.3} ${bowY}
-               Z`, '#8B0000');
+    this.embedSVGAsset('assets/bow-tie-svgrepo-com.svg', x, bowY, size * 0.4, bowScale);
     
-    this.path(`M ${x + bowSize} ${bowY - bowSize * 0.5} 
-               Q ${x + bowSize * 1.5} ${bowY} 
-               ${x + bowSize} ${bowY + bowSize * 0.5}
-               L ${x + bowSize * 0.3} ${bowY}
-               Z`, '#8B0000');
+    // Option 2: Keep the manual drawing as fallback (commented out)
+    /*
+    const bowSize = size * 0.18;
     
-    // Center knot
-    this.ellipse(x, bowY, bowSize * 0.3, bowSize * 0.6, '#660000');
+    // Bow tie left wing - more angular and realistic shape
+    this.path(`M ${x - bowSize * 0.2} ${bowY - bowSize * 0.4} 
+               L ${x - bowSize * 1.2} ${bowY - bowSize * 0.6}
+               L ${x - bowSize * 1.4} ${bowY}
+               L ${x - bowSize * 1.2} ${bowY + bowSize * 0.6}
+               L ${x - bowSize * 0.2} ${bowY + bowSize * 0.4}
+               Z`, '#C60024');
+    
+    // Bow tie right wing - more angular and realistic shape
+    this.path(`M ${x + bowSize * 0.2} ${bowY - bowSize * 0.4} 
+               L ${x + bowSize * 1.2} ${bowY - bowSize * 0.6}
+               L ${x + bowSize * 1.4} ${bowY}
+               L ${x + bowSize * 1.2} ${bowY + bowSize * 0.6}
+               L ${x + bowSize * 0.2} ${bowY + bowSize * 0.4}
+               Z`, '#C60024');
+    
+    // Center knot - rectangular shape like in the reference
+    this.rect(x - bowSize * 0.25, bowY - bowSize * 0.5, bowSize * 0.5, bowSize, '#A50020');
+    
+    // Add shadow/depth to the wings
+    this.path(`M ${x - bowSize * 0.2} ${bowY - bowSize * 0.4} 
+               L ${x - bowSize * 1.2} ${bowY - bowSize * 0.6}
+               L ${x - bowSize * 1.4} ${bowY}
+               L ${x - bowSize * 1.2} ${bowY + bowSize * 0.6}
+               L ${x - bowSize * 0.2} ${bowY + bowSize * 0.4}
+               Z`, '#A50020', 'none', 0);
+    
+    this.path(`M ${x + bowSize * 0.2} ${bowY - bowSize * 0.4} 
+               L ${x + bowSize * 1.2} ${bowY - bowSize * 0.6}
+               L ${x + bowSize * 1.4} ${bowY}
+               L ${x + bowSize * 1.2} ${bowY + bowSize * 0.6}
+               L ${x + bowSize * 0.2} ${bowY + bowSize * 0.4}
+               Z`, '#A50020', 'none', 0);
+    */
   }
 
   private drawHat(x: number, y: number, size: number): void {
-    const hatY = y - size * 0.8;
+    // Use the external SVG asset for the hat
+    const hatY = y - size * 0.4; // Position above the head, not too high
+    const hatScale = 1.5; // Slightly larger scale to be more visible
     
-    // Hat brim
-    this.ellipse(x, hatY + size * 0.2, size * 0.6, size * 0.1, '#000');
-    
-    // Hat crown
-    this.ellipse(x, hatY, size * 0.4, size * 0.3, '#000');
-    
-    // Hat band
-    this.ellipse(x, hatY + size * 0.1, size * 0.4, size * 0.05, '#8B0000');
+    this.embedSVGAsset('assets/hat-svgrepo-com.svg', x, hatY, size * 0.8, hatScale);
   }
 
   private drawGlasses(x: number, y: number, size: number): void {

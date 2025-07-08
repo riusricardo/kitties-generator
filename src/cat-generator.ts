@@ -126,11 +126,6 @@ export class CatGenerator {
     // Draw tail first so it appears behind the body
     this.drawTail(svg, centerX, centerY, catSize, attributes.color);
     
-    // Draw neck accessories before head so they appear on the neck behind the head
-    if (this.isNeckAccessory(attributes.accessory)) {
-      svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
-    }
-    
     // Draw enhanced cat body
     svg.drawCatBody(centerX, centerY, catSize, attributes.color);
     
@@ -139,6 +134,11 @@ export class CatGenerator {
     
     // Draw cat head
     svg.drawCatHead(centerX, centerY - catSize * 0.5, catSize, attributes.color);
+    
+    // Draw neck accessories AFTER body and head so they appear on top
+    if (this.isNeckAccessory(attributes.accessory)) {
+      svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
+    }
     
     // Draw eyes
     svg.drawCatEyes(centerX, centerY - catSize * 0.5, attributes.eyeShape, catSize);
@@ -207,10 +207,21 @@ export class CatGenerator {
     const tailEndX = x - size * 1.8;
     const tailEndY = y + size * 0.2;
     
-    // Enhanced tail with better positioning and rounded end
+    // Create a natural spline curve for the tail with multiple control points
+    // This creates an S-shaped curve that looks more like a real cat tail
+    const control1X = x - size * 0.7;
+    const control1Y = y + size * 0.8;
+    const control2X = x - size * 1.0;
+    const control2Y = y + size * 0.4;
+    const control3X = x - size * 1.4;
+    const control3Y = y + size * 0.6;
+    
+    // Enhanced natural tail with spline curve using multiple Bézier segments
     const tailPath = `M ${tailStartX} ${tailStartY} 
-                      C ${x - size * 0.8} ${y + size * 0.2} 
-                        ${x - size * 1.2} ${y + size * 0.1} 
+                      C ${control1X} ${control1Y} 
+                        ${control2X} ${control2Y} 
+                        ${x - size * 1.2} ${y + size * 0.5}
+                      S ${control3X} ${control3Y} 
                         ${tailEndX} ${tailEndY}`;
     
     const gradientId = svg.addGradient(color, svg.darkenColorPublic(color, 20));
@@ -307,5 +318,26 @@ export class CatGenerator {
       'bow-tie', 'bowtie', 'bandana', 'scarf', 'necklace', 'bell', 'ribbon'
     ];
     return neckAccessories.includes(accessory);
+  }
+
+  /**
+   * Generate a cat with a specific accessory (for testing purposes)
+   */
+  generateCatWithAccessory(seed: string, accessory: string): GeneratedCat {
+    const random = new SeededRandom(seed);
+    const attributes = this.generateAttributes(random);
+    
+    // Override the accessory with the specified one
+    attributes.accessory = accessory;
+    
+    const svgData = this.renderCat(attributes, random);
+    
+    return {
+      id: this.generateId(seed),
+      seed,
+      attributes,
+      svgData,
+      traits: this.calculateTraitRarities(attributes),
+    };
   }
 }
