@@ -81,7 +81,6 @@ export const DEFAULT_CAT_TRAITS: CatTraits = {
   
   mouths: [
     'smile',
-    'frown',
     'neutral',
     'open',
     'tongue',
@@ -95,7 +94,6 @@ export const DEFAULT_CAT_TRAITS: CatTraits = {
     'sleepy',
     'content',
     'mischievous',
-    'grumpy',
     'blep',
     'yawn',
     'meow',
@@ -107,44 +105,22 @@ export const DEFAULT_CAT_TRAITS: CatTraits = {
     'bow-tie',
     'hat',
     'glasses',
-    'bandana',
+    'crown',
+    '1st-place-medal',
+    'adhesive-bandage',
     'scarf',
     'flower',
-    'crown',
     'monocle',
     'earrings',
     'necklace',
     'cape',
     'bowtie',
-    'bell',
     'ribbon',
-    'sunglasses',
-    'party-hat',
-    'tiara',
     'mask',
     'headband',
     'bow',
     'charm',
     'brooch',
-  ],
-  
-  mutations: [
-    'extra-fluffy',
-    'rainbow-fur',
-    'glowing-eyes',
-    'double-tail',
-    'extra-whiskers',
-    'crystal-fur',
-    'fire-pattern',
-    'ice-pattern',
-    'galaxy-fur',
-    'metallic-sheen',
-    'transparency',
-    'size-variant',
-    'pattern-shift',
-    'color-changing',
-    'sparkles',
-    'shadow-clone',
   ],
 };
 
@@ -155,6 +131,14 @@ export const RARITY_WEIGHTS = {
   legendary: 0.04,
   mythical: 0.01,
 };
+
+// export const RARITY_WEIGHTS = {
+//   common: 1,
+//   uncommon: 1,
+//   rare: 1,
+//   legendary: 1,
+//   mythical: 1,
+// };
 
 export const TRAIT_RARITIES = {
   colors: {
@@ -179,24 +163,17 @@ export const TRAIT_RARITIES = {
     mythical: ['playful'],
   },
   mouths: {
-    common: ['smile', 'frown', 'neutral', 'open'],
+    common: ['smile', 'cute', 'neutral', 'playful'],
     uncommon: ['tongue', 'whiskers', 'small', 'wide'],
-    rare: ['cute', 'serious', 'playful', 'surprised'],
+    rare: ['serious', 'surprised', 'open'],
     legendary: ['sleepy', 'content', 'mischievous'],
-    mythical: ['grumpy'],
+    mythical: ['blep'],
   },
   accessories: {
-    common: ['none', 'bandana'],
-    uncommon: ['bow-tie', 'hat', 'glasses', 'scarf'],
-    rare: ['flower', 'crown', 'monocle', 'earrings'],
-    legendary: ['necklace', 'cape', 'bowtie', 'bell'],
-    mythical: ['ribbon'],
-  },
-  mutations: {
-    common: [],
-    uncommon: ['extra-fluffy', 'extra-whiskers'],
-    rare: ['rainbow-fur', 'glowing-eyes', 'double-tail'],
-    legendary: ['crystal-fur', 'fire-pattern', 'ice-pattern', 'galaxy-fur'],
-    mythical: ['metallic-sheen', 'transparency', 'size-variant', 'pattern-shift', 'color-changing', 'sparkles', 'shadow-clone'],
+    common: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
+    uncommon:  ['none', 'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
+    rare:  ['none', 'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
+    legendary: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
+    mythical: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
   },
 };

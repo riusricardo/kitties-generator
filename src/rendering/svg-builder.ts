@@ -103,10 +103,10 @@ export class SVGBuilder {
       const innerSVG = svgMatch[1];
       
       // Calculate proper transform for positioning and scaling
-      // Most SVG assets are around 512-1024px, we want them to be around 50-100px
-      const baseScale = (size * scale) / 1024; // Assuming source SVG is ~1024px
-      const offsetX = x - (512 * baseScale); // Center horizontally
-      const offsetY = y - (512 * baseScale); // Center vertically
+      // Most SVG assets are around 800x800px, we want them to be around 50-100px
+      const baseScale = (size * scale) / 800; // Assuming source SVG is ~800px
+      const offsetX = x - (400 * baseScale); // Center horizontally
+      const offsetY = y - (400 * baseScale); // Center vertically
       
       const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
       
@@ -123,12 +123,12 @@ export class SVGBuilder {
     // Add gradient definition for more depth
     const gradientId = this.addGradient(color, this.darkenColor(color, 15));
     
-    // Main head shape - more rounded and compact like the reference
-    this.ellipse(x, y, size * 0.95, size * 0.95, `url(#${gradientId})`, this.darkenColor(color, 30), 2);
+    // Main head shape - horizontal oval for a more cat-like appearance
+    this.ellipse(x, y, size * 1.1, size * 0.8, `url(#${gradientId})`, this.darkenColor(color, 30), 2);
     
-    // Cat ears - properly positioned triangular ears
-    const earWidth = size * 0.35;
-    const earHeight = size * 0.45;
+    // Cat ears - properly positioned triangular ears with angled base
+    const earWidth = size * 0.45; // Increased from 0.35
+    const earHeight = size * 0.55; // Increased from 0.45
     const earOffset = size * 0.55; // Distance from center to ear base
     
     // Calculate ear base points that touch the head circle
@@ -136,33 +136,40 @@ export class SVGBuilder {
     const rightEarBaseX = x + earOffset;
     const earBaseY = y - size * 0.65; // Position on the head circle
     
-    // Left ear - triangle pointing up and slightly outward
-    this.path(`M ${leftEarBaseX - earWidth/2} ${earBaseY} 
+    // Calculate 30-degree angle for ear base (30 degrees = π/6 radians)
+    const angleRad = (30 * Math.PI) / 180;
+    const baseAngleOffset = earWidth * 0.5 * Math.sin(angleRad);
+    const baseVerticalOffset = earWidth * 0.5 * Math.cos(angleRad) * 0.3; // Adjust vertical offset
+    
+    // Left ear - triangle with angled base following head contour
+    this.path(`M ${leftEarBaseX - earWidth/2 + baseAngleOffset} ${earBaseY + baseVerticalOffset} 
                L ${leftEarBaseX - earWidth * 0.1} ${earBaseY - earHeight} 
-               L ${leftEarBaseX + earWidth/2} ${earBaseY} 
+               L ${leftEarBaseX + earWidth/2 - baseAngleOffset} ${earBaseY - baseVerticalOffset} 
                Z`, 
                `url(#${gradientId})`, this.darkenColor(color, 30), 2);
     
-    // Right ear - triangle pointing up and slightly outward
-    this.path(`M ${rightEarBaseX - earWidth/2} ${earBaseY} 
+    // Right ear - triangle with angled base following head contour
+    this.path(`M ${rightEarBaseX - earWidth/2 + baseAngleOffset} ${earBaseY - baseVerticalOffset} 
                L ${rightEarBaseX + earWidth * 0.1} ${earBaseY - earHeight} 
-               L ${rightEarBaseX + earWidth/2} ${earBaseY} 
+               L ${rightEarBaseX + earWidth/2 - baseAngleOffset} ${earBaseY + baseVerticalOffset} 
                Z`, 
                `url(#${gradientId})`, this.darkenColor(color, 30), 2);
     
-    // Inner ears - smaller pink triangles with same diagonal tilt
+    // Inner ears - smaller pink triangles with same angled base
     const innerEarWidth = earWidth * 0.5;
     const innerEarHeight = earHeight * 0.6;
+    const innerBaseAngleOffset = innerEarWidth * 0.5 * Math.sin(angleRad);
+    const innerBaseVerticalOffset = innerEarWidth * 0.5 * Math.cos(angleRad) * 0.3;
     
-    this.path(`M ${leftEarBaseX - innerEarWidth/2} ${earBaseY - innerEarHeight * 0.2} 
+    this.path(`M ${leftEarBaseX - innerEarWidth/2 + innerBaseAngleOffset} ${earBaseY - innerEarHeight * 0.2 + innerBaseVerticalOffset} 
                L ${leftEarBaseX - innerEarWidth * 0.1} ${earBaseY - innerEarHeight} 
-               L ${leftEarBaseX + innerEarWidth/2} ${earBaseY - innerEarHeight * 0.2} 
+               L ${leftEarBaseX + innerEarWidth/2 - innerBaseAngleOffset} ${earBaseY - innerEarHeight * 0.2 - innerBaseVerticalOffset} 
                Z`, 
                '#FFB6C1');
     
-    this.path(`M ${rightEarBaseX - innerEarWidth/2} ${earBaseY - innerEarHeight * 0.2} 
+    this.path(`M ${rightEarBaseX - innerEarWidth/2 + innerBaseAngleOffset} ${earBaseY - innerEarHeight * 0.2 - innerBaseVerticalOffset} 
                L ${rightEarBaseX + innerEarWidth * 0.1} ${earBaseY - innerEarHeight} 
-               L ${rightEarBaseX + innerEarWidth/2} ${earBaseY - innerEarHeight * 0.2} 
+               L ${rightEarBaseX + innerEarWidth/2 - innerBaseAngleOffset} ${earBaseY - innerEarHeight * 0.2 + innerBaseVerticalOffset} 
                Z`, 
                '#FFB6C1');
   }
@@ -369,8 +376,8 @@ export class SVGBuilder {
     const blushColor = '#FFB6C1';
     const blushOpacity = 0.8;
     
-    this.ellipse(x - cheekOffset, cheekY, cheekSize, cheekSize * 0.7, blushColor, 'none', 0);
-    this.ellipse(x + cheekOffset, cheekY, cheekSize, cheekSize * 0.7, blushColor, 'none', 0);
+    this.ellipse(x - cheekOffset, cheekY, cheekSize, cheekSize * 0.6, blushColor, 'none', 0);
+    this.ellipse(x + cheekOffset, cheekY, cheekSize, cheekSize * 0.6, blushColor, 'none', 0);
   }
 
   // Draw modern cat body with better proportions
@@ -438,31 +445,28 @@ export class SVGBuilder {
         this.drawBowTie(x, y, size);
         break;
       case 'hat':
-      case 'party-hat':
         this.drawHat(x, y, size);
         break;
       case 'glasses':
-      case 'sunglasses':
         this.drawGlasses(x, y, size);
+        break;
+      case 'crown':
+        this.drawCrown(x, y, size);
+        break;
+      case '1st-place-medal':
+        this.draw1stPlaceMedal(x, y, size);
+        break;
+      case 'adhesive-bandage':
+        this.drawAdhesiveBandage(x, y, size);
         break;
       case 'flower':
         this.drawFlower(x, y, size);
-        break;
-      case 'crown':
-      case 'tiara':
-        this.drawCrown(x, y, size);
-        break;
-      case 'bandana':
-        this.drawBandana(x, y, size);
         break;
       case 'scarf':
         this.drawScarf(x, y, size);
         break;
       case 'necklace':
         this.drawNecklace(x, y, size);
-        break;
-      case 'bell':
-        this.drawBell(x, y, size);
         break;
       case 'ribbon':
         this.drawRibbon(x, y, size);
@@ -471,79 +475,46 @@ export class SVGBuilder {
   }
 
   private drawBowTie(x: number, y: number, size: number): void {
-    // Use external SVG asset for bow-tie
-    const bowY = y + size * 0.8; // Position on the neck/chest area
+    // Use external SVG asset for bow-tie - goes on neck, same position as scarf
+    const bowY = y + size * 1; // Position on the neck/chest area, same as scarf
+    const bowX = x + 20
     const bowScale = 2.0; // Larger scale for better visibility
     
-    this.embedSVGAsset('assets/bow-tie-svgrepo-com.svg', x, bowY, size * 0.4, bowScale);
-    
-    // Option 2: Keep the manual drawing as fallback (commented out)
-    /*
-    const bowSize = size * 0.18;
-    
-    // Bow tie left wing - more angular and realistic shape
-    this.path(`M ${x - bowSize * 0.2} ${bowY - bowSize * 0.4} 
-               L ${x - bowSize * 1.2} ${bowY - bowSize * 0.6}
-               L ${x - bowSize * 1.4} ${bowY}
-               L ${x - bowSize * 1.2} ${bowY + bowSize * 0.6}
-               L ${x - bowSize * 0.2} ${bowY + bowSize * 0.4}
-               Z`, '#C60024');
-    
-    // Bow tie right wing - more angular and realistic shape
-    this.path(`M ${x + bowSize * 0.2} ${bowY - bowSize * 0.4} 
-               L ${x + bowSize * 1.2} ${bowY - bowSize * 0.6}
-               L ${x + bowSize * 1.4} ${bowY}
-               L ${x + bowSize * 1.2} ${bowY + bowSize * 0.6}
-               L ${x + bowSize * 0.2} ${bowY + bowSize * 0.4}
-               Z`, '#C60024');
-    
-    // Center knot - rectangular shape like in the reference
-    this.rect(x - bowSize * 0.25, bowY - bowSize * 0.5, bowSize * 0.5, bowSize, '#A50020');
-    
-    // Add shadow/depth to the wings
-    this.path(`M ${x - bowSize * 0.2} ${bowY - bowSize * 0.4} 
-               L ${x - bowSize * 1.2} ${bowY - bowSize * 0.6}
-               L ${x - bowSize * 1.4} ${bowY}
-               L ${x - bowSize * 1.2} ${bowY + bowSize * 0.6}
-               L ${x - bowSize * 0.2} ${bowY + bowSize * 0.4}
-               Z`, '#A50020', 'none', 0);
-    
-    this.path(`M ${x + bowSize * 0.2} ${bowY - bowSize * 0.4} 
-               L ${x + bowSize * 1.2} ${bowY - bowSize * 0.6}
-               L ${x + bowSize * 1.4} ${bowY}
-               L ${x + bowSize * 1.2} ${bowY + bowSize * 0.6}
-               L ${x + bowSize * 0.2} ${bowY + bowSize * 0.4}
-               Z`, '#A50020', 'none', 0);
-    */
+    this.embedSVGAsset('assets/bow-tie.svg', bowX, bowY, size * 0.5, bowScale);
+
   }
 
   private drawHat(x: number, y: number, size: number): void {
-    // Use the external SVG asset for the hat
-    const hatY = y - size * 0.4; // Position above the head, not too high
-    const hatScale = 1.5; // Slightly larger scale to be more visible
+    // Use the external SVG asset for the hat - goes on top of head
+    // Position at ear tip level - ears are at y - size * 0.65 and extend up by size * 0.45
+    // So ear tips are at y - size * 1.1, hat should be positioned there
+    const hatScale = 1.2; // Slightly larger scale to be more visible
+    const hatY = y - size * 1.15;
+    const hatX = x - size * 0.1;
     
-    this.embedSVGAsset('assets/hat-svgrepo-com.svg', x, hatY, size * 0.8, hatScale);
+    this.embedSVGAsset('assets/hat.svg', hatX, hatY, size * 0.8, hatScale);
+  }
+
+  private drawCrown(x: number, y: number, size: number): void {
+    // Use external SVG asset for crown - goes on top of head, same as hat
+    const crownScale = 1.2; // Slightly larger scale to be more visible
+    const crownY = y - size * 1.15;
+    const crownX = x - size * 0.1;
+    
+    this.embedSVGAsset('assets/crown.svg', crownX, crownY, size * 0.8, crownScale);
   }
 
   private drawGlasses(x: number, y: number, size: number): void {
-    const glassesY = y - size * 0.1;
-    const lensSize = size * 0.18;
-    const lensOffset = size * 0.3;
+    // Use external SVG asset for glasses - goes on eyes
+    const glassesScale = 2; // Scale for proper fit
+    const glassesY = y - size * 0.25; 
+    const glassesX = x - size * 0.15; 
     
-    // Lens frames
-    this.circle(x - lensOffset, glassesY, lensSize, 'none', '#000', 3);
-    this.circle(x + lensOffset, glassesY, lensSize, 'none', '#000', 3);
-    
-    // Lens reflections
-    this.circle(x - lensOffset, glassesY, lensSize * 0.8, 'rgba(255,255,255,0.3)');
-    this.circle(x + lensOffset, glassesY, lensSize * 0.8, 'rgba(255,255,255,0.3)');
-    
-    // Bridge
-    this.path(`M ${x - lensSize * 0.5} ${glassesY} 
-               L ${x + lensSize * 0.5} ${glassesY}`, 'none', '#000', 3);
+    this.embedSVGAsset('assets/glasses.svg', glassesX, glassesY, size * 0.5, glassesScale);
   }
 
   private drawFlower(x: number, y: number, size: number): void {
+
     const flowerX = x + size * 0.3; // Closer to neck
     const flowerY = y + size * 0.8; // Position as neck accessory, consistent with bow-tie
     const petalSize = size * 0.08;
@@ -558,108 +529,41 @@ export class SVGBuilder {
     
     // Flower center
     this.circle(flowerX, flowerY, petalSize * 0.4, '#FFD700');
-  }
 
-  private drawCrown(x: number, y: number, size: number): void {
-    const crownY = y - size * 0.7;
-    const crownWidth = size * 0.8;
-    
-    // Crown base
-    this.ellipse(x, crownY + size * 0.15, crownWidth, size * 0.1, '#FFD700', this.darkenColor('#FFD700', 20), 2);
-    
-    // Crown points
-    for (let i = 0; i < 5; i++) {
-      const pointX = x + (i - 2) * crownWidth * 0.2;
-      const pointHeight = size * 0.2 + (i % 2 === 0 ? size * 0.1 : 0);
-      this.path(`M ${pointX - size * 0.08} ${crownY + size * 0.15} 
-                 L ${pointX} ${crownY - pointHeight} 
-                 L ${pointX + size * 0.08} ${crownY + size * 0.15} 
-                 Z`, '#FFD700');
-    }
-    
-    // Crown gems
-    this.circle(x, crownY, size * 0.05, '#FF0000');
-    this.circle(x - crownWidth * 0.2, crownY + size * 0.05, size * 0.03, '#0000FF');
-    this.circle(x + crownWidth * 0.2, crownY + size * 0.05, size * 0.03, '#0000FF');
-  }
-
-  private drawBandana(x: number, y: number, size: number): void {
-    const bandanaY = y + size * 0.8;
-    const bandanaWidth = size * 0.6;
-    
-    // Bandana triangle
-    this.path(`M ${x - bandanaWidth * 0.5} ${bandanaY} 
-               L ${x + bandanaWidth * 0.5} ${bandanaY}
-               L ${x} ${bandanaY + size * 0.3}
-               Z`, '#DC143C');
-    
-    // Bandana pattern (simple dots)
-    this.circle(x - size * 0.1, bandanaY + size * 0.1, size * 0.02, '#FFF');
-    this.circle(x + size * 0.1, bandanaY + size * 0.1, size * 0.02, '#FFF');
-    this.circle(x, bandanaY + size * 0.2, size * 0.02, '#FFF');
   }
 
   private drawScarf(x: number, y: number, size: number): void {
-    const scarfY = y + size * 0.8;
-    const scarfWidth = size * 0.4;
-    
-    // Scarf band
-    this.ellipse(x, scarfY, scarfWidth, size * 0.08, '#FF6B6B');
-    
-    // Scarf ends
-    this.ellipse(x - scarfWidth * 0.3, scarfY + size * 0.15, size * 0.06, size * 0.2, '#FF6B6B');
-    this.ellipse(x + scarfWidth * 0.3, scarfY + size * 0.15, size * 0.06, size * 0.2, '#FF6B6B');
-    
-    // Scarf stripes
-    this.ellipse(x, scarfY, scarfWidth, size * 0.02, '#FFF');
+   const scarfScale = 5; // Same scale as hat
+   const scarfY = y + size * 0.8;
+   const scarfX = x + size * 0.8;
+   this.embedSVGAsset('assets/scarf.svg', scarfX, scarfY, size * 0.5, scarfScale);
   }
 
   private drawNecklace(x: number, y: number, size: number): void {
-    const necklaceY = y + size * 0.8;
-    const necklaceRadius = size * 0.25;
-    
-    // Necklace chain (simple ellipse)
-    this.ellipse(x, necklaceY, necklaceRadius, size * 0.05, '#FFD700', '#DAA520', 1);
-    
-    // Pendant
-    this.circle(x, necklaceY + size * 0.1, size * 0.06, '#FF1493');
-    this.circle(x, necklaceY + size * 0.1, size * 0.03, '#FFF');
+
   }
 
-  private drawBell(x: number, y: number, size: number): void {
-    const bellY = y + size * 0.8;
-    
-    // Bell collar
-    this.ellipse(x, bellY, size * 0.3, size * 0.05, '#8B4513');
-    
-    // Bell
-    this.ellipse(x, bellY + size * 0.1, size * 0.08, size * 0.08, '#FFD700');
-    this.ellipse(x, bellY + size * 0.1, size * 0.06, size * 0.06, '#FFF');
-    
-    // Bell highlight
-    this.circle(x - size * 0.02, bellY + size * 0.08, size * 0.02, '#FFF');
-  }
 
   private drawRibbon(x: number, y: number, size: number): void {
-    const ribbonY = y + size * 0.8;
-    const ribbonWidth = size * 0.2;
+
+  }
+
+  private draw1stPlaceMedal(x: number, y: number, size: number): void {
+    // Use external SVG asset for 1st place medal - goes on neck center
+    const medalY = y; // Position on the neck/chest area, same as bow-tie
+    const medalScale = 50; // Much larger scale to match bow-tie visibility (bow-tie uses 2.0 with 0.4 size)
+    const medalX = x;
     
-    // Ribbon bow
-    this.ellipse(x - ribbonWidth * 0.5, ribbonY, ribbonWidth * 0.4, ribbonWidth * 0.8, '#FF69B4');
-    this.ellipse(x + ribbonWidth * 0.5, ribbonY, ribbonWidth * 0.4, ribbonWidth * 0.8, '#FF69B4');
+    this.embedSVGAsset('assets/1st-place-medal.svg', x, medalY, size * 0.7, medalScale);
+  }
+
+  private drawAdhesiveBandage(x: number, y: number, size: number): void {
+    // Use external SVG asset for adhesive bandage - goes on the side of one eye without touching it
+    const bandageX = x - size * 0.35; // Position to the left side of face
+    const bandageY = y - size * 0.2; // Position at eye level but to the side
+    const bandageScale = 0.8; // Smaller scale so it doesn't interfere with eye
     
-    // Ribbon center
-    this.ellipse(x, ribbonY, ribbonWidth * 0.2, ribbonWidth * 0.4, '#FF1493');
-    
-    // Ribbon tails
-    this.path(`M ${x - ribbonWidth * 0.1} ${ribbonY + ribbonWidth * 0.4} 
-               L ${x - ribbonWidth * 0.3} ${ribbonY + ribbonWidth * 0.8}
-               L ${x - ribbonWidth * 0.2} ${ribbonY + ribbonWidth * 0.8}
-               Z`, '#FF69B4');
-    this.path(`M ${x + ribbonWidth * 0.1} ${ribbonY + ribbonWidth * 0.4} 
-               L ${x + ribbonWidth * 0.3} ${ribbonY + ribbonWidth * 0.8}
-               L ${x + ribbonWidth * 0.2} ${ribbonY + ribbonWidth * 0.8}
-               Z`, '#FF69B4');
+    this.embedSVGAsset('assets/adhesive-bandage.svg', bandageX, bandageY, size * 0.3, bandageScale);
   }
 
   private lightenColor(color: string, amount: number): string {

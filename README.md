@@ -5,7 +5,7 @@ A TypeScript library for generating CryptoKitties-style cat images with customiz
 ## Features
 
 - 🎯 **Deterministic Generation**: Use seeds to generate consistent cats
-- 🎨 **Rich Attributes**: Color, Fur Pattern, Eye Shape, Mouth, Accessory, and Mutations
+- 🎨 **Rich Attributes**: Color, Fur Pattern, Eye Shape, Mouth, and Accessory
 - 🏆 **Rarity System**: Traits have different rarity levels (Common, Uncommon, Rare, Legendary, Mythical)
 - 🖼️ **SVG Output**: Generated cats are rendered as scalable SVG images
 - 🔧 **Customizable**: Configure canvas size and custom trait sets
@@ -72,14 +72,7 @@ Each generated cat has the following attributes:
 
 ### Accessory
 16 different accessories:
-- none, bow-tie, collar, hat, glasses, bandana, scarf, flower, crown, monocle, earrings, necklace, cape, bowtie, bell, ribbon
-
-### Mutation Flags
-Special rare mutations that can appear:
-- Uncommon: extra-fluffy, extra-whiskers
-- Rare: rainbow-fur, glowing-eyes, double-tail
-- Legendary: crystal-fur, fire-pattern, ice-pattern, galaxy-fur
-- Mythical: metallic-sheen, transparency, size-variant, pattern-shift, color-changing, sparkles, shadow-clone
+- none, bow-tie, collar, hat, glasses, scarf, flower, crown, monocle, earrings, necklace, cape, bowtie, ribbon
 
 ## API Reference
 
@@ -127,7 +120,6 @@ interface CatAttributes {
   eyeShape: string;
   mouth: string;
   accessory: string;
-  mutationFlags: string[];
 }
 ```
 

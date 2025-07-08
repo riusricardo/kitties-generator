@@ -4,7 +4,6 @@ export interface CatAttributes {
   eyeShape: string;
   mouth: string;
   accessory: string;
-  mutationFlags: string[];
 }
 
 export interface CatTraits {
@@ -13,7 +12,6 @@ export interface CatTraits {
   eyeShapes: string[];
   mouths: string[];
   accessories: string[];
-  mutations: string[];
 }
 
 export interface GeneratedCat {

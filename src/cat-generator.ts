@@ -11,7 +11,7 @@ export class CatGenerator {
   constructor(options: CatGeneratorOptions = {}) {
     this.traits = { ...DEFAULT_CAT_TRAITS, ...options.customTraits };
     this.width = options.width || 400;
-    this.height = options.height || 400;
+    this.height = options.height || 500; // Increased from 400 to 500 to accommodate hats and accessories
   }
 
   /**
@@ -56,7 +56,6 @@ export class CatGenerator {
       eyeShape: this.selectTraitByRarity(random, 'eyeShapes'),
       mouth: this.selectTraitByRarity(random, 'mouths'),
       accessory: this.selectTraitByRarity(random, 'accessories'),
-      mutationFlags: this.generateMutations(random),
     };
 
     return attributes;
@@ -86,37 +85,17 @@ export class CatGenerator {
   }
 
   /**
-   * Generate mutation flags
-   */
-  private generateMutations(random: SeededRandom): string[] {
-    const mutations: string[] = [];
-    const mutationChance = 0.15; // 15% chance for any mutation
-    
-    if (random.randomBool(mutationChance)) {
-      const numMutations = random.randomInt(1, 3);
-      for (let i = 0; i < numMutations; i++) {
-        const mutation = this.selectTraitByRarity(random, 'mutations');
-        if (!mutations.includes(mutation)) {
-          mutations.push(mutation);
-        }
-      }
-    }
-    
-    return mutations;
-  }
-
-  /**
    * Render the cat as SVG
    */
   private renderCat(attributes: CatAttributes, random: SeededRandom): string {
     const svg = new SVGBuilder(this.width, this.height, random);
     
-    // Background
-    const bgGradient = svg.addRadialGradient('#F0F8FF', this.darkenColor('#F0F8FF', 10));
-    svg.rect(0, 0, this.width, this.height, `url(#${bgGradient})`);
+    // REMOVED: Background - making it transparent
+    // const bgGradient = svg.addRadialGradient('#F0F8FF', this.darkenColor('#F0F8FF', 10));
+    // svg.rect(0, 0, this.width, this.height, `url(#${bgGradient})`);
     
-    // Add background footprints for texture
-    this.addBackgroundFootprints(svg, random);
+    // REMOVED: Add background footprints for texture - transparent background
+    // this.addBackgroundFootprints(svg, random);
     
     // Cat body positioning
     const centerX = this.width / 2;
@@ -155,9 +134,6 @@ export class CatGenerator {
     if (!this.isNeckAccessory(attributes.accessory)) {
       svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
     }
-    
-    // Apply mutations
-    this.applyMutations(svg, centerX, centerY, catSize, attributes.mutationFlags);
     
     // Draw whiskers last on face so they appear on top of other features
     svg.drawWhiskers(centerX, centerY - catSize * 0.5, catSize);
@@ -204,8 +180,8 @@ export class CatGenerator {
   private drawTail(svg: SVGBuilder, x: number, y: number, size: number, color: string): void {
     const tailStartX = x - size * 0.5;
     const tailStartY = y + size * 0.6;
-    const tailEndX = x - size * 1.8;
-    const tailEndY = y + size * 0.2;
+    const tailEndX = x - size * 1.5;
+    const tailEndY = y + size * 0.3;
     
     // Create a natural spline curve for the tail with multiple control points
     // This creates an S-shaped curve that looks more like a real cat tail
@@ -232,49 +208,6 @@ export class CatGenerator {
     svg.circle(tailEndX, tailEndY, size * 0.11, `url(#${gradientId})`, svg.darkenColorPublic(color, 30), 2);
   }
 
-  private applyMutations(svg: SVGBuilder, x: number, y: number, size: number, mutations: string[]): void {
-    mutations.forEach(mutation => {
-      switch (mutation) {
-        case 'glowing-eyes':
-          svg.circle(x - size * 0.32, y - size * 0.1, size * 0.3, 'rgba(255, 255, 0, 0.3)');
-          svg.circle(x + size * 0.32, y - size * 0.1, size * 0.3, 'rgba(255, 255, 0, 0.3)');
-          break;
-        case 'sparkles':
-          for (let i = 0; i < 5; i++) {
-            const sparkleX = x + (Math.random() - 0.5) * size * 2;
-            const sparkleY = y + (Math.random() - 0.5) * size * 2;
-            svg.text(sparkleX, sparkleY, '✨', size * 0.12, '#FFD700');
-          }
-          break;
-        case 'double-tail':
-          const tailStartX2 = x + size * 0.5;
-          const tailStartY2 = y + size * 0.6;
-          const tailEndX2 = x + size * 1.8;
-          const tailEndY2 = y + size * 0.2;
-          
-          const tailPath2 = `M ${tailStartX2} ${tailStartY2} 
-                            C ${x + size * 0.8} ${y + size * 0.2} 
-                              ${x + size * 1.2} ${y + size * 0.1} 
-                              ${tailEndX2} ${tailEndY2}`;
-          
-          const gradientId2 = svg.addGradient('#FFB6C1', svg.darkenColorPublic('#FFB6C1', 20));
-          svg.path(tailPath2, 'none', `url(#${gradientId2})`, size * 0.22);
-          svg.path(tailPath2, 'none', svg.darkenColorPublic('#FFB6C1', 30), 2);
-          svg.circle(tailEndX2, tailEndY2, size * 0.11, `url(#${gradientId2})`, svg.darkenColorPublic('#FFB6C1', 30), 2);
-          break;
-        case 'extra-fluffy':
-          // Add extra fluffy outline
-          svg.circle(x, y, size * 1.1, 'rgba(255, 255, 255, 0.3)');
-          break;
-        case 'rainbow-fur':
-          // Add rainbow gradient overlay
-          const rainbowGradient = svg.addGradient('#FF0000', '#00FF00');
-          svg.circle(x, y, size * 0.8, `url(#${rainbowGradient})`, 'none', 0);
-          break;
-      }
-    });
-  }
-
   /**
    * Calculate trait rarities for the generated cat
    */
@@ -287,9 +220,6 @@ export class CatGenerator {
     rarities.eyeShape = this.getTraitRarity(attributes.eyeShape, 'eyeShapes');
     rarities.mouth = this.getTraitRarity(attributes.mouth, 'mouths');
     rarities.accessory = this.getTraitRarity(attributes.accessory, 'accessories');
-    rarities.mutationFlags = attributes.mutationFlags.map(mutation => 
-      this.getTraitRarity(mutation, 'mutations')
-    );
     
     return rarities;
   }
@@ -315,29 +245,54 @@ export class CatGenerator {
    */
   private isNeckAccessory(accessory: string): boolean {
     const neckAccessories = [
-      'bow-tie', 'bowtie', 'bandana', 'scarf', 'necklace', 'bell', 'ribbon'
+      'bow-tie', 'bowtie', 'scarf', 'necklace', 'ribbon', '1st-place-medal'
     ];
     return neckAccessories.includes(accessory);
   }
 
   /**
-   * Generate a cat with a specific accessory (for testing purposes)
+   * Helper method to determine if an accessory is a head/neck accessory (has SVG asset)
    */
-  generateCatWithAccessory(seed: string, accessory: string): GeneratedCat {
-    const random = new SeededRandom(seed);
-    const attributes = this.generateAttributes(random);
-    
-    // Override the accessory with the specified one
-    attributes.accessory = accessory;
-    
-    const svgData = this.renderCat(attributes, random);
-    
-    return {
-      id: this.generateId(seed),
-      seed,
-      attributes,
-      svgData,
-      traits: this.calculateTraitRarities(attributes),
-    };
+  private isHeadOrNeckAccessory(accessory: string): boolean {
+    const headOrNeckAccessories = [
+      'hat', 'crown', 'bow-tie', 'bowtie', '1st-place-medal', 'scarf', 
+      'glasses', 'adhesive-bandage'
+    ];
+    return headOrNeckAccessories.includes(accessory);
+  }
+
+  /**
+   * Generate a cat that is guaranteed to have at least one head or neck accessory
+   */
+  generateCatWithAccessory(seed: string, accessory?: string): GeneratedCat {
+    if (accessory) {
+      // Generate cat with specific accessory
+      const random = new SeededRandom(seed);
+      const attributes = this.generateAttributes(random);
+      
+      // Override the accessory with the specified one
+      attributes.accessory = accessory;
+      
+      const svgData = this.renderCat(attributes, random);
+      
+      return {
+        id: this.generateId(seed),
+        seed,
+        attributes,
+        svgData,
+        traits: this.calculateTraitRarities(attributes),
+      };
+    } else {
+      // Generate cat with guaranteed head/neck accessory
+      let attempts = 0;
+      let cat = this.generateCat(seed);
+      
+      while (!this.isHeadOrNeckAccessory(cat.attributes.accessory) && attempts < 10) {
+        attempts++;
+        cat = this.generateCat(seed + '-attempt-' + attempts);
+      }
+      
+      return cat;
+    }
   }
 }

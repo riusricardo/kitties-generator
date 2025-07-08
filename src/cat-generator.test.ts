@@ -18,7 +18,6 @@ describe('CatGenerator', () => {
     expect(cat.attributes).toHaveProperty('eyeShape');
     expect(cat.attributes).toHaveProperty('mouth');
     expect(cat.attributes).toHaveProperty('accessory');
-    expect(cat.attributes).toHaveProperty('mutationFlags');
     expect(cat.svgData).toContain('<svg');
     expect(cat.svgData).toContain('</svg>');
   });
@@ -65,11 +64,10 @@ describe('CatGenerator', () => {
     expect(typeof cat.attributes.eyeShape).toBe('string');
     expect(typeof cat.attributes.mouth).toBe('string');
     expect(typeof cat.attributes.accessory).toBe('string');
-    expect(Array.isArray(cat.attributes.mutationFlags)).toBe(true);
   });
 
   test('should generate SVG with proper dimensions', () => {
-    const generator = new CatGenerator({ width: 300, height: 300 });
+    const generator = new CatGenerator({ width: 400, height: 500 });
     const cat = generator.generateCat('test');
 
     expect(cat.svgData).toContain('width="300"');

@@ -10,10 +10,8 @@ const generator = new CatGenerator();
 const neckAccessories = [
   'bow-tie',
   'bowtie', 
-  'bandana',
   'scarf',
   'necklace',
-  'bell',
   'ribbon'
 ];
 

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "dev": "ts-node src/example.ts",
+    "dev": "rm -fr tmp/ && mkdir tmp && ts-node src/example.ts",
     "test": "jest",
     "prepublishOnly": "npm run build"
   },
