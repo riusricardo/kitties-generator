@@ -42,9 +42,14 @@ function main() {
   fs.writeFileSync(filename, cat.svgData);
   console.log(`\n💾 SVG saved to: ${filename}`);
 
+// c3lysuk0ie5 -> medal
+// 43653fd334fdgs -> bowtie
+// crypto-45 -> crown
+// seed11 -> gllasses
+
   // Generate multiple cats with different seeds
   console.log('\n🔄 Generating multiple cats...');
-  const seeds = ['34w5sdg', 'seed22', 'wtre', 'hello-744', 'crypto-45', '345', '43653fds'];
+  const seeds = ['seed11', 'seed22', 'seed33', 'c3lysuk0ie5', 'crypto-45', '345345', '43653fd334fdgs'];
   const cats = seeds.map((seed) => {
     let c = generator.generateCat(seed);
     let tries = 0;
@@ -56,30 +61,39 @@ function main() {
   });
 
   cats.forEach((cat, index) => {
-    console.log(`\nCat ${index + 1}:`);
-    console.log(`  Color: ${cat.attributes.color}`);
-    console.log(`  Pattern: ${cat.attributes.furPattern}`);
-    console.log(`  Eyes: ${cat.attributes.eyeShape}`);
+    console.log(`\n🎯 Generated Cat ID: ${cat.id}`);
+    console.log(`🎲 Seed: ${cat.seed}`);
+    console.log('\n📊 Cat Attributes:');
+    console.log(`   Color: ${cat.attributes.color}`);
+    console.log(`   Fur Pattern: ${cat.attributes.furPattern}`);
+    console.log(`   Eye Shape: ${cat.attributes.eyeShape}`);
+    console.log(`   Mouth: ${cat.attributes.mouth}`);
+    console.log(`   Accessory: ${cat.attributes.accessory}`);
+
     
     // Save each cat
     const catFilename = `tmp/cat-${cat.seed}.svg`;
     fs.writeFileSync(catFilename, cat.svgData);
   });
 
-  // Generate a random cat
-  console.log('\n🎲 Generating random cat...');
-  let randomCat = generator.generateRandomCat();
-  let randTries = 0;
-  while (!validAccessories.includes(randomCat.attributes.accessory) && randTries < 10) {
-    randomCat = generator.generateRandomCat();
-    randTries++;
+  // Generate 10 random cats with valid accessories
+  for (let i = 0; i < 10; i++) {
+    let randomCat = generator.generateRandomCat();
+    let randTries = 0;
+    while (!validAccessories.includes(randomCat.attributes.accessory) && randTries < 10) {
+      randomCat = generator.generateRandomCat();
+      randTries++;
+    }
+    console.log('\n🎲 Generating random cat...');
+    console.log(`🎲 Seed: ${randomCat.seed}`);
+    console.log('\n📊 Cat Attributes:');
+    console.log(`   Color: ${randomCat.attributes.color}`);
+    console.log(`   Fur Pattern: ${randomCat.attributes.furPattern}`);
+    console.log(`   Eye Shape: ${randomCat.attributes.eyeShape}`);
+    console.log(`   Mouth: ${randomCat.attributes.mouth}`);
+    console.log(`   Accessory: ${randomCat.attributes.accessory}`);
+    fs.writeFileSync(`tmp/cat-random-${randomCat.seed}.svg`, randomCat.svgData);
   }
-  console.log(`Random cat seed: ${randomCat.seed}`);
-  console.log(`Color: ${randomCat.attributes.color}`);
-  console.log(`Pattern: ${randomCat.attributes.furPattern}`);
-  
-  fs.writeFileSync(`tmp/cat-random-${randomCat.seed}.svg`, randomCat.svgData);
-
   console.log('\n✅ Demo complete! Check the generated SVG files.');
 }
 

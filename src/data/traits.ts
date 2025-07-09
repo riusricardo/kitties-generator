@@ -110,10 +110,8 @@ export const DEFAULT_CAT_TRAITS: CatTraits = {
     'adhesive-bandage',
     'scarf',
     'flower',
-    'monocle',
-    'earrings',
     'necklace',
-    'cape',
+    'mask',
     'bowtie',
     'ribbon',
     'mask',
@@ -125,20 +123,12 @@ export const DEFAULT_CAT_TRAITS: CatTraits = {
 };
 
 export const RARITY_WEIGHTS = {
-  common: 0.6,
+  common: 0.3,
   uncommon: 0.25,
-  rare: 0.1,
-  legendary: 0.04,
-  mythical: 0.01,
+  rare: 0.2,
+  legendary: 0.2,
+  mythical: 0.1,
 };
-
-// export const RARITY_WEIGHTS = {
-//   common: 1,
-//   uncommon: 1,
-//   rare: 1,
-//   legendary: 1,
-//   mythical: 1,
-// };
 
 export const TRAIT_RARITIES = {
   colors: {
@@ -170,10 +160,10 @@ export const TRAIT_RARITIES = {
     mythical: ['blep'],
   },
   accessories: {
-    common: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
-    uncommon:  ['none', 'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
-    rare:  ['none', 'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
-    legendary: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
-    mythical: ['none',  'necklace','bow-tie', 'hat', 'glasses', 'scarf', '1st-place-medal', 'crown', 'adhesive-bandage', 'flower'],
+    common: ['none', 'scarf', 'bow-tie', 'glasses', 'adhesive-bandage'],
+    uncommon: ['hat', 'flower', 'necklace', 'bowtie', 'ribbon'],
+    rare: ['crown', '1st-place-medal', 'mask'],
+    legendary: ['mask', 'crown', '1st-place-medal', 'mask'],
+    mythical: ['mask'],
   },
 };

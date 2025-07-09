@@ -72,7 +72,7 @@ Each generated cat has the following attributes:
 
 ### Accessory
 16 different accessories:
-- none, bow-tie, collar, hat, glasses, scarf, flower, crown, monocle, earrings, necklace, cape, bowtie, ribbon
+- none, bow-tie, collar, hat, glasses, scarf, flower, crown, necklace, mask, bowtie, ribbon
 
 ## API Reference
 

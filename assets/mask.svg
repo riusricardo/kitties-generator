@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+	 viewBox="0 0 48 48" xml:space="preserve">
+<defs>
+	<mask id="eyeHolesMask">
+		<!-- White area will be visible, black areas will be transparent -->
+		<rect width="48" height="48" fill="white"/>
+		<!-- Black ellipses create transparent holes for eyes -->
+		<ellipse cx="18" cy="22" rx="3" ry="4" fill="black"/>
+		<ellipse cx="30" cy="22" rx="3" ry="4" fill="black"/>
+		<!-- Black ellipse creates transparent hole for mouth -->
+		<ellipse cx="24" cy="32" rx="4" ry="3" fill="black"/>
+	</mask>
+</defs>
+<g>
+	<!-- Apply mask to create eye holes -->
+	<g mask="url(#eyeHolesMask)">
+		<ellipse style="fill:#FBD971;" cx="24" cy="24" rx="22" ry="16"/>
+		<ellipse style="fill:#556080;" cx="24" cy="20" rx="20" ry="12"/>
+		<!-- Gray triangles to cover cat ears with 15-degree outward angle -->
+		<polygon style="fill:#556080;" points="8,15 14,-1 20,15" transform="rotate(-15 14 7)"/>
+		<polygon style="fill:#556080;" points="28,15 34,-1 40,15" transform="rotate(15 34 7)"/>
+	</g>
+</g>
+</svg>

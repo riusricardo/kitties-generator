@@ -114,11 +114,6 @@ export class CatGenerator {
     // Draw cat head
     svg.drawCatHead(centerX, centerY - catSize * 0.5, catSize, attributes.color);
     
-    // Draw neck accessories AFTER body and head so they appear on top
-    if (this.isNeckAccessory(attributes.accessory)) {
-      svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
-    }
-    
     // Draw eyes
     svg.drawCatEyes(centerX, centerY - catSize * 0.5, attributes.eyeShape, catSize);
     
@@ -130,16 +125,14 @@ export class CatGenerator {
       svg.drawCheekBlush(centerX, centerY - catSize * 0.5, catSize);
     }
     
-    // Draw non-neck accessories (head accessories)
-    if (!this.isNeckAccessory(attributes.accessory)) {
-      svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
-    }
-    
-    // Draw whiskers last on face so they appear on top of other features
+    // Draw whiskers
     svg.drawWhiskers(centerX, centerY - catSize * 0.5, catSize);
     
     // Draw legs last so they appear on top of everything else
     svg.drawCatLegs(centerX, centerY, catSize, attributes.color);
+    
+    // Draw ALL accessories LAST so they appear in front of everything
+    svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
     
     return svg.build();
   }
