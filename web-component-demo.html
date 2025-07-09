@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoKitty Web Component Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .demo-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        crypto-kitty {
+            display: inline-block;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐱 CryptoKitty Web Component Demo</h1>
+    
+    <div class="demo-section">
+        <h2>Seeded Cats</h2>
+        <div class="grid">
+            <crypto-kitty seed="fluffy" width="200" height="250"></crypto-kitty>
+            <crypto-kitty seed="whiskers" width="200" height="250"></crypto-kitty>
+            <crypto-kitty seed="mittens" width="200" height="250"></crypto-kitty>
+            <crypto-kitty seed="shadow" width="200" height="250"></crypto-kitty>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Random Cats</h2>
+        <div class="grid" id="randomCats">
+            <!-- Random cats will be added here -->
+        </div>
+        <button onclick="generateRandomCats()">Generate More Random Cats</button>
+    </div>
+
+    <script src="dist/index.umd.js"></script>
+    <script>
+        // Define a custom web component for crypto kitties
+        class CryptoKittyElement extends HTMLElement {
+            constructor() {
+                super();
+                this.generator = new CryptoKittyGenerator.CatGenerator();
+            }
+            
+            connectedCallback() {
+                const seed = this.getAttribute('seed') || 'default';
+                const width = parseInt(this.getAttribute('width')) || 300;
+                const height = parseInt(this.getAttribute('height')) || 350;
+                
+                // Configure generator with custom dimensions
+                this.generator = new CryptoKittyGenerator.CatGenerator({ width, height });
+                
+                const cat = this.generator.generateCat(seed);
+                
+                this.innerHTML = `
+                    <div style="text-align: center; padding: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            ${cat.svgData}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            <strong>${cat.id}</strong><br>
+                            Seed: ${cat.seed}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Register the custom element
+        customElements.define('crypto-kitty', CryptoKittyElement);
+        
+        // Function to generate random cats
+        function generateRandomCats() {
+            const container = document.getElementById('randomCats');
+            container.innerHTML = ''; // Clear existing cats
+            
+            const generator = new CryptoKittyGenerator.CatGenerator({ width: 200, height: 250 });
+            
+            for (let i = 0; i < 6; i++) {
+                const cat = generator.generateRandomCat();
+                const catElement = document.createElement('div');
+                catElement.style.cssText = 'text-align: center; padding: 10px; background: #f9f9f9; border-radius: 8px;';
+                catElement.innerHTML = `
+                    <div style="margin-bottom: 10px;">
+                        ${cat.svgData}
+                    </div>
+                    <div style="font-size: 12px; color: #666;">
+                        <strong>${cat.id}</strong><br>
+                        Seed: ${cat.seed}
+                    </div>
+                `;
+                container.appendChild(catElement);
+            }
+        }
+        
+        // Generate initial random cats
+        generateRandomCats();
+    </script>
+</body>
+</html>

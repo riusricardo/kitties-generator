@@ -1,6 +1,5 @@
 import { SeededRandom } from '../utils/random';
-import * as fs from 'fs';
-import * as path from 'path';
+import { EMBEDDED_ASSETS, getAsset, EmbeddedAsset } from '../data/embedded-assets';
 
 export class SVGBuilder {
   private elements: string[] = [];
@@ -86,55 +85,46 @@ export class SVGBuilder {
   }
 
   /**
-   * Load and embed an external SVG asset
+   * Embed a browser-compatible SVG asset from the original high-quality assets
    */
-  embedSVGAsset(assetPath: string, x: number, y: number, size: number, scale: number = 1): void {
+  embedSVGAsset(assetName: string, x: number, y: number, size: number, scale: number = 1): void {
     try {
-      const fullPath = path.resolve(process.cwd(), assetPath);
-      const svgContent = fs.readFileSync(fullPath, 'utf-8');
-      
-      // Extract the content between <svg> tags, excluding the opening and closing svg tags
-      const svgMatch = svgContent.match(/<svg[^>]*>(.*?)<\/svg>/s);
-      if (!svgMatch) {
-        console.warn(`Could not parse SVG content from ${assetPath}`);
+      const asset = getAsset(assetName);
+      if (!asset) {
+        console.warn(`Asset '${assetName}' not found in embedded assets`);
         return;
       }
       
-      const innerSVG = svgMatch[1];
+      // Parse viewBox to get original dimensions
+      const viewBoxValues = asset.viewBox.split(/\s+/).map(Number);
+      let sourceWidth = 24;
+      let sourceHeight = 24;
       
-      // Sanitize the SVG content by removing problematic namespace elements
-      const sanitizedSVG = this.sanitizeSVGContent(innerSVG);
-      
-      // Extract viewBox to get the actual dimensions
-      const viewBoxMatch = svgContent.match(/viewBox="([^"]+)"/);
-      let sourceWidth = 800;
-      let sourceHeight = 800;
-      let sourceCenterX = 400;
-      let sourceCenterY = 400;
-      
-      if (viewBoxMatch) {
-        const viewBoxValues = viewBoxMatch[1].split(/\s+/).map(Number);
-        if (viewBoxValues.length === 4) {
-          const [minX, minY, width, height] = viewBoxValues;
-          sourceWidth = width;
-          sourceHeight = height;
-          sourceCenterX = minX + width / 2;
-          sourceCenterY = minY + height / 2;
-        }
+      if (viewBoxValues.length === 4) {
+        const [minX, minY, width, height] = viewBoxValues;
+        sourceWidth = width;
+        sourceHeight = height;
       }
       
-      // Calculate proper transform for positioning and scaling
-      const baseScale = (size * scale) / Math.max(sourceWidth, sourceHeight);
-      const offsetX = x - (sourceCenterX * baseScale);
-      const offsetY = y - (sourceCenterY * baseScale);
+      // Calculate scaling factors
+      const scaledSize = size * scale;
+      const baseScale = scaledSize / Math.max(sourceWidth, sourceHeight);
       
+      // Calculate center positioning
+      const offsetX = x - (sourceWidth * baseScale) / 2;
+      const offsetY = y - (sourceHeight * baseScale) / 2;
+      
+      // Create a group with transformation and the original viewBox
       const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
       
-      // Wrap the SVG content in a group with the transform
-      this.addElement(`<g transform="${transform}">${sanitizedSVG}</g>`);
+      this.addElement(`<g transform="${transform}">
+        <svg viewBox="${asset.viewBox}" width="${sourceWidth}" height="${sourceHeight}" style="overflow: visible;">
+          ${asset.content}
+        </svg>
+      </g>`);
       
     } catch (error) {
-      console.warn(`Could not load SVG asset from ${assetPath}:`, error);
+      console.error(`Error embedding SVG asset '${assetName}':`, error);
     }
   }
 
@@ -523,7 +513,7 @@ export class SVGBuilder {
     const bowX = x
     const bowScale = 2.0; // Larger scale for better visibility
     
-    this.embedSVGAsset('assets/bow-tie.svg', bowX, bowY, size * 0.5, bowScale);
+    this.embedSVGAsset('bow-tie', bowX, bowY, size * 0.5, bowScale);
 
   }
 
@@ -535,7 +525,7 @@ export class SVGBuilder {
     const hatY = y - size * 1.15;
     const hatX = x;
     
-    this.embedSVGAsset('assets/hat.svg', hatX, hatY, size * 0.8, hatScale);
+    this.embedSVGAsset('hat', hatX, hatY, size * 0.8, hatScale);
   }
 
   private drawCrown(x: number, y: number, size: number): void {
@@ -544,7 +534,7 @@ export class SVGBuilder {
     const crownY = y - size * 1.15;
     const crownX = x;
     
-    this.embedSVGAsset('assets/crown.svg', crownX, crownY, size * 0.8, crownScale);
+    this.embedSVGAsset('crown', crownX, crownY, size * 0.8, crownScale);
   }
 
   private drawGlasses(x: number, y: number, size: number): void {
@@ -553,7 +543,7 @@ export class SVGBuilder {
     const glassesY = y - size * 0.1; 
     const glassesX = x; 
     
-    this.embedSVGAsset('assets/glasses.svg', glassesX, glassesY, size * 0.5, glassesScale);
+    this.embedSVGAsset('glasses', glassesX, glassesY, size * 0.5, glassesScale);
   }
 
   private drawFlower(x: number, y: number, size: number): void {
@@ -579,14 +569,14 @@ export class SVGBuilder {
    const scarfScale = 2; // Same scale as hat
    const scarfY = y + size * 1.25;
    const scarfX = x + size * 0.15;
-   this.embedSVGAsset('assets/scarf.svg', scarfX, scarfY, size * 0.5, scarfScale);
+   this.embedSVGAsset('scarf', scarfX, scarfY, size * 0.5, scarfScale);
   }
 
   private drawNecklace(x: number, y: number, size: number): void {
     const necklaceY = y + size * 1.05;
     const necklaceScale = 1;
     const necklaceX = x;
-   this.embedSVGAsset('assets/necklace.svg', necklaceX, necklaceY, size * 0.5, necklaceScale);
+   this.embedSVGAsset('necklace', necklaceX, necklaceY, size * 0.5, necklaceScale);
   }
 
 
@@ -594,7 +584,7 @@ export class SVGBuilder {
     const ribbonY = y + size * 1.1;
     const ribbonScale = 1;
     const ribbonX = x;
-   this.embedSVGAsset('assets/ribbon.svg', ribbonX, ribbonY, size * 0.5, ribbonScale);
+   this.embedSVGAsset('ribbon', ribbonX, ribbonY, size * 0.5, ribbonScale);
   }
 
   private draw1stPlaceMedal(x: number, y: number, size: number): void {
@@ -602,7 +592,7 @@ export class SVGBuilder {
     const medalScale = 1;
     const medalX = x;
     
-    this.embedSVGAsset('assets/1st-place-medal.svg', x, medalY, size * 0.7, medalScale);
+    this.embedSVGAsset('1st-place-medal', x, medalY, size * 0.7, medalScale);
   }
 
   private drawAdhesiveBandage(x: number, y: number, size: number): void {
@@ -611,7 +601,7 @@ export class SVGBuilder {
     const bandageY = y - size * 0.5; // Position at eye level but to the side
     const bandageScale = 1; // Smaller scale so it doesn't interfere with eye
     
-    this.embedSVGAsset('assets/adhesive-bandage.svg', bandageX, bandageY, size * 0.3, bandageScale);
+    this.embedSVGAsset('adhesive-bandage', bandageX, bandageY, size * 0.3, bandageScale);
   }
 
   private drawMask(x: number, y: number, size: number): void {
@@ -621,7 +611,7 @@ export class SVGBuilder {
     const maskY = y; // Same vertical position as the head center
     const maskScale = 2.45; // Scale to match cat head size (head is size * 1.1 wide)
     
-    this.embedSVGAsset('assets/mask.svg', maskX, maskY, size, maskScale);
+    this.embedSVGAsset('mask', maskX, maskY, size, maskScale);
   }
 
 

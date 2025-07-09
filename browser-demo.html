@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoKitty Generator - Browser Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        input[type="text"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .cat-card {
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            background: #f9f9f9;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .cat-svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .cat-info {
+            margin-top: 15px;
+            text-align: left;
+        }
+        
+        .cat-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            text-align: center;
+        }
+        
+        .trait {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px;
+            background: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .trait-name {
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .trait-value {
+            color: #333;
+        }
+        
+        .rarity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .rarity.common { background: #95a5a6; color: white; }
+        .rarity.uncommon { background: #27ae60; color: white; }
+        .rarity.rare { background: #3498db; color: white; }
+        .rarity.legendary { background: #9b59b6; color: white; }
+        .rarity.mythical { background: #e74c3c; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐱 CryptoKitty Generator</h1>
+        
+        <div class="controls">
+            <input type="text" id="seedInput" placeholder="Enter a seed (e.g., 'my-cool-cat')" value="demo-cat">
+            <button onclick="generateFromSeed()">Generate Cat</button>
+            <button onclick="generateRandom()">Generate Random</button>
+            <button onclick="clearGallery()">Clear Gallery</button>
+        </div>
+        
+        <div id="gallery" class="gallery"></div>
+    </div>
+
+    <!-- Include the UMD build of the library -->
+    <script src="dist/index.umd.js"></script>
+    
+    <script>
+        // Initialize the cat generator
+        const generator = new CryptoKittyGenerator.CatGenerator();
+        
+        function generateFromSeed() {
+            const seed = document.getElementById('seedInput').value || 'default-seed';
+            const cat = generator.generateCat(seed);
+            addCatToGallery(cat);
+        }
+        
+        function generateRandom() {
+            const cat = generator.generateRandomCat();
+            addCatToGallery(cat);
+        }
+        
+        function addCatToGallery(cat) {
+            const gallery = document.getElementById('gallery');
+            
+            const catCard = document.createElement('div');
+            catCard.className = 'cat-card';
+            
+            catCard.innerHTML = `
+                <div class="cat-svg">${cat.svgData}</div>
+                <div class="cat-info">
+                    <h3>Cat #${cat.id}</h3>
+                    <div class="trait">
+                        <span class="trait-name">Seed:</span>
+                        <span class="trait-value">${cat.seed}</span>
+                    </div>
+                    <div class="trait">
+                        <span class="trait-name">Color:</span>
+                        <span class="trait-value">${cat.attributes.color} <span class="rarity ${cat.traits.color}">${cat.traits.color}</span></span>
+                    </div>
+                    <div class="trait">
+                        <span class="trait-name">Pattern:</span>
+                        <span class="trait-value">${cat.attributes.furPattern} <span class="rarity ${cat.traits.furPattern}">${cat.traits.furPattern}</span></span>
+                    </div>
+                    <div class="trait">
+                        <span class="trait-name">Eyes:</span>
+                        <span class="trait-value">${cat.attributes.eyeShape} <span class="rarity ${cat.traits.eyeShape}">${cat.traits.eyeShape}</span></span>
+                    </div>
+                    <div class="trait">
+                        <span class="trait-name">Mouth:</span>
+                        <span class="trait-value">${cat.attributes.mouth} <span class="rarity ${cat.traits.mouth}">${cat.traits.mouth}</span></span>
+                    </div>
+                    <div class="trait">
+                        <span class="trait-name">Accessory:</span>
+                        <span class="trait-value">${cat.attributes.accessory} <span class="rarity ${cat.traits.accessory}">${cat.traits.accessory}</span></span>
+                    </div>
+                </div>
+            `;
+            
+            gallery.insertBefore(catCard, gallery.firstChild);
+        }
+        
+        function clearGallery() {
+            document.getElementById('gallery').innerHTML = '';
+        }
+        
+        // Generate initial cats
+        generateFromSeed();
+        generateRandom();
+    </script>
+</body>
+</html>

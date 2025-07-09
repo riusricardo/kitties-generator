@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Quality Comparison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .cat-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .cat-svg svg {
+            max-width: 300px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐱 CryptoKitty Generator - Asset Quality Comparison</h1>
+    
+    <div class="info">
+        <h3>✅ High-Quality Assets</h3>
+        <p>We now use the original SVG assets from the <code>assets/</code> folder, which contain:</p>
+        <ul>
+            <li>Rich color gradients and detailed shapes</li>
+            <li>Proper scaling and positioning</li>
+            <li>Original artwork quality preserved</li>
+            <li>Full SVG features (paths, gradients, etc.)</li>
+        </ul>
+    </div>
+    
+    <div class="controls">
+        <button onclick="generateCatWithAccessory('bow-tie')">Generate Cat with Bow Tie</button>
+        <button onclick="generateCatWithAccessory('crown')">Generate Cat with Crown</button>
+        <button onclick="generateCatWithAccessory('glasses')">Generate Cat with Glasses</button>
+        <button onclick="generateCatWithAccessory('1st-place-medal')">Generate Cat with Medal</button>
+        <button onclick="generateCatWithAccessory('mask')">Generate Cat with Mask</button>
+        <button onclick="generateCatWithAccessory('hat')">Generate Cat with Hat</button>
+    </div>
+    
+    <div id="catGallery" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
+
+    <script src="dist/index.umd.js"></script>
+    <script>
+        const generator = new CryptoKittyGenerator.CatGenerator();
+        
+        function generateCatWithAccessory(accessory) {
+            // Generate a cat with the specified accessory
+            const seed = `${accessory}-demo-${Date.now()}`;
+            const cat = generator.generateCat(seed);
+            
+            // If the cat doesn't have the desired accessory, keep trying with different seeds
+            let attempts = 0;
+            let finalCat = cat;
+            while (finalCat.attributes.accessory !== accessory && attempts < 10) {
+                const newSeed = `${accessory}-demo-${Date.now()}-${attempts}`;
+                finalCat = generator.generateCat(newSeed);
+                attempts++;
+            }
+            
+            addCatToGallery(finalCat);
+        }
+        
+        function addCatToGallery(cat) {
+            const gallery = document.getElementById('catGallery');
+            
+            const catCard = document.createElement('div');
+            catCard.className = 'section';
+            catCard.innerHTML = `
+                <div class="cat-display">
+                    <div class="cat-svg">${cat.svgData}</div>
+                    <h3>Cat #${cat.id}</h3>
+                    <p><strong>Seed:</strong> ${cat.seed}</p>
+                    <p><strong>Accessory:</strong> ${cat.attributes.accessory} (${cat.traits.accessory})</p>
+                    <p><strong>Color:</strong> ${cat.attributes.color}</p>
+                    <p><strong>Pattern:</strong> ${cat.attributes.furPattern}</p>
+                </div>
+            `;
+            
+            gallery.appendChild(catCard);
+        }
+        
+        // Generate some initial cats
+        generateCatWithAccessory('bow-tie');
+        generateCatWithAccessory('crown');
+    </script>
+</body>
+</html>

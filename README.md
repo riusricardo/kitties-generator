@@ -10,6 +10,7 @@ A TypeScript library for generating CryptoKitties-style cat images with customiz
 - 🖼️ **SVG Output**: Generated cats are rendered as scalable SVG images
 - 🔧 **Customizable**: Configure canvas size and custom trait sets
 - 📦 **TypeScript**: Full type safety and IntelliSense support
+- 🌐 **Browser Compatible**: Works in both Node.js and browser environments
 
 ## Installation
 
@@ -18,6 +19,8 @@ npm install cryptokitty-generator
 ```
 
 ## Quick Start
+
+### Node.js / TypeScript
 
 ```typescript
 import { CatGenerator } from 'cryptokitty-generator';
@@ -38,9 +41,77 @@ console.log('Generated Cat:', {
   traits: cat.traits
 });
 
-// Save the SVG
+// Save the SVG (Node.js only)
 import fs from 'fs';
 fs.writeFileSync('my-cat.svg', cat.svgData);
+```
+
+### Browser Usage
+
+#### Using UMD Build (Script Tag)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CryptoKitty Generator</title>
+</head>
+<body>
+    <div id="cat-container"></div>
+    
+    <!-- Include the library -->
+    <script src="node_modules/cryptokitty-generator/dist/index.umd.js"></script>
+    
+    <script>
+        // Create generator
+        const generator = new CryptoKittyGenerator.CatGenerator();
+        
+        // Generate a cat
+        const cat = generator.generateCat('browser-cat');
+        
+        // Display the SVG
+        document.getElementById('cat-container').innerHTML = cat.svgData;
+        
+        console.log('Cat attributes:', cat.attributes);
+        console.log('Cat traits:', cat.traits);
+    </script>
+</body>
+</html>
+```
+
+#### Using ES Modules
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CryptoKitty Generator</title>
+</head>
+<body>
+    <div id="cat-container"></div>
+    
+    <script type="module">
+        import { CatGenerator } from './node_modules/cryptokitty-generator/dist/index.esm.js';
+        
+        const generator = new CatGenerator();
+        const cat = generator.generateCat('esm-cat');
+        
+        document.getElementById('cat-container').innerHTML = cat.svgData;
+    </script>
+</body>
+</html>
+```
+
+#### Using a Bundler (Webpack, Vite, etc.)
+
+```typescript
+import { CatGenerator } from 'cryptokitty-generator';
+
+const generator = new CatGenerator();
+const cat = generator.generateCat('bundled-cat');
+
+// Use the cat data in your app
+console.log(cat);
 ```
 
 ## Cat Attributes
