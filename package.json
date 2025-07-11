@@ -2,10 +2,18 @@
   "name": "cryptokitty-generator",
   "version": "1.0.0",
   "description": "A TypeScript library for generating CryptoKitties-style cat images with customizable attributes",
+  "type": "module",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.js",
   "browser": "dist/index.umd.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist/",
     "assets/"

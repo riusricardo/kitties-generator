@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "ES2020",
     "lib": ["ES2020", "DOM"],
     "outDir": "./dist",
     "rootDir": "./src",
@@ -13,14 +13,16 @@
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "types": ["node", "jest"]
+    "moduleResolution": "bundler",
+    "types": ["node"]
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
   ]
 }
