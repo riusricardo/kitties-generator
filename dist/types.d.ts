@@ -24,5 +24,6 @@ export interface CatGeneratorOptions {
     height?: number;
     format?: 'svg' | 'png' | 'base64';
     customTraits?: Partial<CatTraits>;
+    responsive?: boolean;
 }
 //# sourceMappingURL=types.d.ts.map

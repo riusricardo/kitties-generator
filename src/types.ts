@@ -27,4 +27,5 @@ export interface CatGeneratorOptions {
   height?: number;
   format?: 'svg' | 'png' | 'base64';
   customTraits?: Partial<CatTraits>;
+  responsive?: boolean; // Make SVGs scalable by removing fixed dimensions
 }

@@ -7,11 +7,13 @@ export class CatGenerator {
   private traits: CatTraits;
   private width: number;
   private height: number;
+  private responsive: boolean;
 
   constructor(options: CatGeneratorOptions = {}) {
     this.traits = { ...DEFAULT_CAT_TRAITS, ...options.customTraits };
     this.width = options.width || 400;
     this.height = options.height || 500; // Increased from 400 to 500 to accommodate hats and accessories
+    this.responsive = options.responsive || false;
   }
 
   /**
@@ -88,14 +90,7 @@ export class CatGenerator {
    * Render the cat as SVG
    */
   private renderCat(attributes: CatAttributes, random: SeededRandom): string {
-    const svg = new SVGBuilder(this.width, this.height, random);
-    
-    // REMOVED: Background - making it transparent
-    // const bgGradient = svg.addRadialGradient('#F0F8FF', this.darkenColor('#F0F8FF', 10));
-    // svg.rect(0, 0, this.width, this.height, `url(#${bgGradient})`);
-    
-    // REMOVED: Add background footprints for texture - transparent background
-    // this.addBackgroundFootprints(svg, random);
+    const svg = new SVGBuilder(this.width, this.height, random, this.responsive);
     
     // Cat body positioning
     const centerX = this.width / 2;
@@ -135,6 +130,62 @@ export class CatGenerator {
     svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
     
     return svg.build();
+  }
+
+  /**
+   * Generate a responsive cat that scales dynamically
+   */
+  generateResponsiveCat(seed: string): GeneratedCat {
+    const random = new SeededRandom(seed);
+    const attributes = this.generateAttributes(random);
+    const svg = new SVGBuilder(this.width, this.height, random, true);
+    
+    // Cat body positioning
+    const centerX = this.width / 2;
+    const centerY = this.height / 2;
+    const catSize = Math.min(this.width, this.height) * 0.3;
+
+    // Draw tail first so it appears behind the body
+    this.drawTail(svg, centerX, centerY, catSize, attributes.color);
+
+    // Draw enhanced cat body
+    svg.drawCatBody(centerX, centerY, catSize, attributes.color);
+
+    // Apply fur pattern
+    svg.drawFurPattern(centerX, centerY, catSize, attributes.furPattern, attributes.color);
+
+    // Draw cat head
+    svg.drawCatHead(centerX, centerY - catSize * 0.5, catSize, attributes.color);
+
+    // Draw eyes
+    svg.drawCatEyes(centerX, centerY - catSize * 0.5, attributes.eyeShape, catSize);
+
+    // Draw mouth
+    svg.drawCatMouth(centerX, centerY - catSize * 0.5, attributes.mouth, catSize);
+
+    // Draw cheek blush for extra cuteness - more frequent for kawaii style
+    if (random.random() < 0.7) { // 70% chance for blush to match cute reference
+      svg.drawCheekBlush(centerX, centerY - catSize * 0.5, catSize);
+    }
+
+    // Draw whiskers
+    svg.drawWhiskers(centerX, centerY - catSize * 0.5, catSize);
+
+    // Draw legs last so they appear on top of everything else
+    svg.drawCatLegs(centerX, centerY, catSize, attributes.color);
+
+    // Draw ALL accessories LAST so they appear in front of everything
+    svg.drawAccessory(centerX, centerY - catSize * 0.5, catSize, attributes.accessory);
+
+    const svgData = svg.build();
+
+    return {
+      id: this.generateId(seed),
+      seed,
+      attributes,
+      svgData,
+      traits: this.calculateTraitRarities(attributes),
+    };
   }
 
   /**

@@ -6,7 +6,8 @@ export declare class SVGBuilder {
     private height;
     private random;
     private gradientCounter;
-    constructor(width: number, height: number, random: SeededRandom);
+    private responsive;
+    constructor(width: number, height: number, random: SeededRandom, responsive?: boolean);
     addElement(element: string): void;
     circle(cx: number, cy: number, r: number, fill: string, stroke?: string, strokeWidth?: number): void;
     ellipse(cx: number, cy: number, rx: number, ry: number, fill: string, stroke?: string, strokeWidth?: number): void;

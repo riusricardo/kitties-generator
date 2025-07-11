@@ -3,6 +3,7 @@ export declare class CatGenerator {
     private traits;
     private width;
     private height;
+    private responsive;
     constructor(options?: CatGeneratorOptions);
     /**
      * Generate a cat from a seed
@@ -28,6 +29,10 @@ export declare class CatGenerator {
      * Render the cat as SVG
      */
     private renderCat;
+    /**
+     * Generate a responsive cat that scales dynamically
+     */
+    generateResponsiveCat(seed: string): GeneratedCat;
     /**
      * Helper method to darken a color
      */

@@ -8,11 +8,13 @@ export class SVGBuilder {
   private height: number;
   private random: SeededRandom;
   private gradientCounter: number = 0;
+  private responsive: boolean;
 
-  constructor(width: number, height: number, random: SeededRandom) {
+  constructor(width: number, height: number, random: SeededRandom, responsive: boolean = false) {
     this.width = width;
     this.height = height;
     this.random = random;
+    this.responsive = responsive;
   }
 
   addElement(element: string): void {
@@ -56,10 +58,18 @@ export class SVGBuilder {
 
   build(): string {
     const defsSection = this.defs.length > 0 ? `<defs>${this.defs.join('')}</defs>` : '';
-    return `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">
+    
+    if (this.responsive) {
+      return `<svg viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       ${defsSection}
       ${this.elements.join('\n')}
     </svg>`;
+    } else {
+      return `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">
+      ${defsSection}
+      ${this.elements.join('\n')}
+    </svg>`;
+    }
   }
 
   addGradient(color1: string, color2: string): string {
@@ -118,7 +128,7 @@ export class SVGBuilder {
       const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
       
       this.addElement(`<g transform="${transform}">
-        <svg viewBox="${asset.viewBox}" width="${sourceWidth}" height="${sourceHeight}" style="overflow: visible;">
+        <svg viewBox="${asset.viewBox}" style="overflow: visible;">
           ${asset.content}
         </svg>
       </g>`);

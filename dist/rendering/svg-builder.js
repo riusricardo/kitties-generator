@@ -1,12 +1,13 @@
 import { getAsset } from '../data/embedded-assets';
 export class SVGBuilder {
-    constructor(width, height, random) {
+    constructor(width, height, random, responsive = false) {
         this.elements = [];
         this.defs = [];
         this.gradientCounter = 0;
         this.width = width;
         this.height = height;
         this.random = random;
+        this.responsive = responsive;
     }
     addElement(element) {
         this.elements.push(element);
@@ -41,10 +42,18 @@ export class SVGBuilder {
     }
     build() {
         const defsSection = this.defs.length > 0 ? `<defs>${this.defs.join('')}</defs>` : '';
-        return `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">
+        if (this.responsive) {
+            return `<svg viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       ${defsSection}
       ${this.elements.join('\n')}
     </svg>`;
+        }
+        else {
+            return `<svg width="${this.width}" height="${this.height}" viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg">
+      ${defsSection}
+      ${this.elements.join('\n')}
+    </svg>`;
+        }
     }
     addGradient(color1, color2) {
         const gradientId = `gradient${this.gradientCounter++}`;
@@ -94,7 +103,7 @@ export class SVGBuilder {
             // Create a group with transformation and the original viewBox
             const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
             this.addElement(`<g transform="${transform}">
-        <svg viewBox="${asset.viewBox}" width="${sourceWidth}" height="${sourceHeight}" style="overflow: visible;">
+        <svg viewBox="${asset.viewBox}" style="overflow: visible;">
           ${asset.content}
         </svg>
       </g>`);
