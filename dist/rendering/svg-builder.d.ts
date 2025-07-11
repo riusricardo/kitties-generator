@@ -7,7 +7,13 @@ export declare class SVGBuilder {
     private random;
     private gradientCounter;
     private responsive;
+    private scaleX;
+    private scaleY;
     constructor(width: number, height: number, random: SeededRandom, responsive?: boolean);
+    private transformX;
+    private transformY;
+    private transformSize;
+    private transformPath;
     addElement(element: string): void;
     circle(cx: number, cy: number, r: number, fill: string, stroke?: string, strokeWidth?: number): void;
     ellipse(cx: number, cy: number, rx: number, ry: number, fill: string, stroke?: string, strokeWidth?: number): void;

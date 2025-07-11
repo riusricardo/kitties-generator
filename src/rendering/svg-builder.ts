@@ -9,12 +9,50 @@ export class SVGBuilder {
   private random: SeededRandom;
   private gradientCounter: number = 0;
   private responsive: boolean;
+  private scaleX: number = 1;
+  private scaleY: number = 1;
 
   constructor(width: number, height: number, random: SeededRandom, responsive: boolean = false) {
     this.width = width;
     this.height = height;
     this.random = random;
     this.responsive = responsive;
+    
+    if (responsive) {
+      // Normalize to 100x100 coordinate system while maintaining aspect ratio
+      const maxDimension = Math.max(width, height);
+      this.scaleX = 100 / maxDimension;
+      this.scaleY = 100 / maxDimension;
+    }
+  }
+
+  private transformX(x: number): number {
+    return this.responsive ? x * this.scaleX : x;
+  }
+
+  private transformY(y: number): number {
+    return this.responsive ? y * this.scaleY : y;
+  }
+
+  private transformSize(size: number): number {
+    return this.responsive ? size * Math.min(this.scaleX, this.scaleY) : size;
+  }
+
+  private transformPath(pathData: string): string {
+    if (!this.responsive) return pathData;
+    
+    // Transform path data by applying scale to coordinates
+    return pathData.replace(/([ML])\s*([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+)/g, (match, command, x, y) => {
+      return `${command} ${this.transformX(parseFloat(x))} ${this.transformY(parseFloat(y))}`;
+    }).replace(/([CQS])\s*([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+)(?:\s+([+-]?\d*\.?\d+)\s+([+-]?\d*\.?\d+))?/g, (match, command, x1, y1, x2, y2, x3, y3) => {
+      if (x3 !== undefined && y3 !== undefined) {
+        // Cubic Bezier (C) or smooth cubic (S)
+        return `${command} ${this.transformX(parseFloat(x1))} ${this.transformY(parseFloat(y1))} ${this.transformX(parseFloat(x2))} ${this.transformY(parseFloat(y2))} ${this.transformX(parseFloat(x3))} ${this.transformY(parseFloat(y3))}`;
+      } else {
+        // Quadratic Bezier (Q)
+        return `${command} ${this.transformX(parseFloat(x1))} ${this.transformY(parseFloat(y1))} ${this.transformX(parseFloat(x2))} ${this.transformY(parseFloat(y2))}`;
+      }
+    });
   }
 
   addElement(element: string): void {
@@ -22,33 +60,58 @@ export class SVGBuilder {
   }
 
   circle(cx: number, cy: number, r: number, fill: string, stroke?: string, strokeWidth?: number): void {
-    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${strokeWidth || 1}"` : '';
-    this.addElement(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" ${strokeAttr} />`);
+    const transformedCx = this.transformX(cx);
+    const transformedCy = this.transformY(cy);
+    const transformedR = this.transformSize(r);
+    const transformedStrokeWidth = strokeWidth ? this.transformSize(strokeWidth) : strokeWidth;
+    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${transformedStrokeWidth || 1}"` : '';
+    this.addElement(`<circle cx="${transformedCx}" cy="${transformedCy}" r="${transformedR}" fill="${fill}" ${strokeAttr} />`);
   }
 
   ellipse(cx: number, cy: number, rx: number, ry: number, fill: string, stroke?: string, strokeWidth?: number): void {
-    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${strokeWidth || 1}"` : '';
-    this.addElement(`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" ${strokeAttr} />`);
+    const transformedCx = this.transformX(cx);
+    const transformedCy = this.transformY(cy);
+    const transformedRx = this.transformSize(rx);
+    const transformedRy = this.transformSize(ry);
+    const transformedStrokeWidth = strokeWidth ? this.transformSize(strokeWidth) : strokeWidth;
+    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${transformedStrokeWidth || 1}"` : '';
+    this.addElement(`<ellipse cx="${transformedCx}" cy="${transformedCy}" rx="${transformedRx}" ry="${transformedRy}" fill="${fill}" ${strokeAttr} />`);
   }
 
   path(d: string, fill: string, stroke?: string, strokeWidth?: number): void {
-    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${strokeWidth || 1}"` : '';
-    this.addElement(`<path d="${d}" fill="${fill}" ${strokeAttr} />`);
+    const transformedPath = this.transformPath(d);
+    const transformedStrokeWidth = strokeWidth ? this.transformSize(strokeWidth) : strokeWidth;
+    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${transformedStrokeWidth || 1}"` : '';
+    this.addElement(`<path d="${transformedPath}" fill="${fill}" ${strokeAttr} />`);
   }
 
   polygon(points: string, fill: string, stroke?: string, strokeWidth?: number): void {
-    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${strokeWidth || 1}"` : '';
-    this.addElement(`<polygon points="${points}" fill="${fill}" ${strokeAttr} />`);
+    // Transform polygon points
+    const transformedPoints = this.responsive ? 
+      points.replace(/([+-]?\d*\.?\d+),([+-]?\d*\.?\d+)/g, (match, x, y) => {
+        return `${this.transformX(parseFloat(x))},${this.transformY(parseFloat(y))}`;
+      }) : points;
+    const transformedStrokeWidth = strokeWidth ? this.transformSize(strokeWidth) : strokeWidth;
+    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${transformedStrokeWidth || 1}"` : '';
+    this.addElement(`<polygon points="${transformedPoints}" fill="${fill}" ${strokeAttr} />`);
   }
 
   rect(x: number, y: number, width: number, height: number, fill: string, stroke?: string, strokeWidth?: number): void {
-    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${strokeWidth || 1}"` : '';
-    this.addElement(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${fill}" ${strokeAttr} />`);
+    const transformedX = this.transformX(x);
+    const transformedY = this.transformY(y);
+    const transformedWidth = this.transformSize(width);
+    const transformedHeight = this.transformSize(height);
+    const transformedStrokeWidth = strokeWidth ? this.transformSize(strokeWidth) : strokeWidth;
+    const strokeAttr = stroke ? `stroke="${stroke}" stroke-width="${transformedStrokeWidth || 1}"` : '';
+    this.addElement(`<rect x="${transformedX}" y="${transformedY}" width="${transformedWidth}" height="${transformedHeight}" fill="${fill}" ${strokeAttr} />`);
   }
 
   text(x: number, y: number, text: string, fontSize: number, fill: string, fontFamily?: string): void {
+    const transformedX = this.transformX(x);
+    const transformedY = this.transformY(y);
+    const transformedFontSize = this.transformSize(fontSize);
     const font = fontFamily || 'Arial';
-    this.addElement(`<text x="${x}" y="${y}" font-family="${font}" font-size="${fontSize}" fill="${fill}">${text}</text>`);
+    this.addElement(`<text x="${transformedX}" y="${transformedY}" font-family="${font}" font-size="${transformedFontSize}" fill="${fill}">${text}</text>`);
   }
 
   group(elements: string[], transform?: string): void {
@@ -60,7 +123,11 @@ export class SVGBuilder {
     const defsSection = this.defs.length > 0 ? `<defs>${this.defs.join('')}</defs>` : '';
     
     if (this.responsive) {
-      return `<svg viewBox="0 0 ${this.width} ${this.height}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      // Use normalized 100-unit coordinate system
+      const normalizedWidth = this.width * this.scaleX;
+      const normalizedHeight = this.height * this.scaleY;
+      
+      return `<svg viewBox="0 0 ${normalizedWidth} ${normalizedHeight}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
       ${defsSection}
       ${this.elements.join('\n')}
     </svg>`;
@@ -116,13 +183,18 @@ export class SVGBuilder {
         sourceHeight = height;
       }
       
+      // Transform coordinates for responsive mode
+      const transformedX = this.transformX(x);
+      const transformedY = this.transformY(y);
+      const transformedSize = this.transformSize(size);
+      
       // Calculate scaling factors
-      const scaledSize = size * scale;
+      const scaledSize = transformedSize * scale;
       const baseScale = scaledSize / Math.max(sourceWidth, sourceHeight);
       
       // Calculate center positioning
-      const offsetX = x - (sourceWidth * baseScale) / 2;
-      const offsetY = y - (sourceHeight * baseScale) / 2;
+      const offsetX = transformedX - (sourceWidth * baseScale) / 2;
+      const offsetY = transformedY - (sourceHeight * baseScale) / 2;
       
       // Create a group with transformation and the original viewBox
       const transform = `translate(${offsetX}, ${offsetY}) scale(${baseScale})`;
