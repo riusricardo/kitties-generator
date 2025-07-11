@@ -1,0 +1,1 @@
+{"version":3,"file":"embedded-assets.d.ts","sourceRoot":"","sources":["../../src/data/embedded-assets.ts"],"names":[],"mappings":"AAGA,MAAM,WAAW,aAAa;IAC5B,OAAO,EAAE,MAAM,CAAC;IAChB,OAAO,EAAE,MAAM,CAAC;CACjB;AAED,eAAO,MAAM,eAAe,EAAE,MAAM,CAAC,MAAM,EAAE,aAAa,CAqDzD,CAAC;AAEF,wBAAgB,QAAQ,CAAC,IAAI,EAAE,MAAM,GAAG,aAAa,GAAG,IAAI,CAE3D;AAED,wBAAgB,aAAa,IAAI,MAAM,EAAE,CAExC"}
